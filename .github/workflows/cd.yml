@@ -14,7 +14,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Set up NodGCPe
         uses: actions/setup-node@v4
         with:
           node-version: 18
@@ -27,6 +27,7 @@ jobs:
 
   job_id:
     name: Run GCP, Build and Push Image to Artifact Registry
+    runs-on: ubuntu-latest
 
     steps:
       - id: 'auth'
