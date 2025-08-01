@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest --run",
+    "lint": "eslint .",
     "format:write": "prettier --write \"src/**/*.{js,ts,json,css,md}\"",
     "format:check": "prettier --write \"src/**/*.{js,ts,json,css,md}\"",
     "db:generate": "drizzle-kit generate",
