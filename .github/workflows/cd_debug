@@ -1,0 +1,72 @@
+name: CD Pipeline Debug
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  debug-structure:
+    name: Debug Repository Structure
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: List all files in root
+        run: |
+          echo "=== Root directory contents ==="
+          ls -la
+          
+      - name: Check for Dockerfile specifically
+        run: |
+          echo "=== Checking for Dockerfile ==="
+          if [ -f "Dockerfile" ]; then
+            echo "✅ Dockerfile found"
+            echo "=== Dockerfile contents ==="
+            cat Dockerfile
+          else
+            echo "❌ Dockerfile NOT found"
+          fi
+          
+      - name: Check for any Docker-related files
+        run: |
+          echo "=== Looking for Docker-related files ==="
+          find . -name "*docker*" -o -name "*Docker*" -type f
+          
+      - name: Check working directory
+        run: |
+          echo "=== Current working directory ==="
+          pwd
+          echo "=== Directory tree ==="
+          tree -a . || ls -laR
+
+  deploy:
+    name: Build and Push Docker Image  
+    runs-on: ubuntu-latest
+    needs: debug-structure
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Debug before build'
+        run: |
+          echo "=== Pre-build debug ==="
+          pwd
+          ls -la
+          echo "=== Checking for Dockerfile again ==="
+          test -f Dockerfile && echo "Dockerfile exists" || echo "Dockerfile missing"
+
+      - name: 'Build and Push Docker Image'
+        run: |
+          gcloud builds submit --tag us-central1-docker.pkg.dev/notely-467714/notely/image:latest .
